@@ -2,7 +2,7 @@ import fastify from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 
-import { env } from "./env";
+import { env } from "@/env";
 
 const app = fastify();
 const PORT = env.PORT;

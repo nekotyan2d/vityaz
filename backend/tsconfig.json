@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+
+        "strict": true,
+        "target": "es2022",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+
+        "verbatimModuleSyntax": true,
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "exactOptionalPropertyTypes": true,
+        "noFallthroughCasesInSwitch": true,
+
+        "rootDir": "./src",
+        "outDir": "./dist"
+    },
+
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
+}
