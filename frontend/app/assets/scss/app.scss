@@ -1,0 +1,30 @@
+@use "variables";
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
+
+body {
+    margin: 0;
+    font-family: "Google Sans", sans-serif;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    min-height: 100vh;
+    min-height: 100dvh;
+    line-height: 1.5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+::selection {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
