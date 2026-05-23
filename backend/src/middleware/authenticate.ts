@@ -14,5 +14,5 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
         return reply.status(401).send({ message: "Unauthorized" });
     }
 
-    request.user = payload as { id: number };
+    request.user = { employeeId: payload.employeeId, role: payload.role };
 }

@@ -3,7 +3,8 @@ import "fastify";
 declare module "fastify" {
     interface FastifyRequest {
         user: {
-            id: number;
+            employeeId: number;
+            role: "admin" | "employee";
         };
     }
 }

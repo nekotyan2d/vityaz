@@ -24,7 +24,7 @@ export class AuthService {
             throw new Error("Invalid email or password");
         }
 
-        const accessToken = generateAccessToken(user.id);
+        const accessToken = generateAccessToken(user.id, user.role);
         const refreshToken = generateRefreshToken(user.id);
 
         await this.repository.createToken(user.id, refreshToken);
@@ -42,7 +42,7 @@ export class AuthService {
         const employee = await new EmployeeService(new EmployeeRepository()).create({
             email,
             fullName,
-            categoryId: 1,
+            categoryId: 7, // Гость - категория по умолчанию до назначения роли
             passwordHash: hashedPassword,
         });
 
@@ -50,7 +50,7 @@ export class AuthService {
             throw new Error("Failed to create user");
         }
 
-        const accessToken = generateAccessToken(employee[0]!.id);
+        const accessToken = generateAccessToken(employee[0]!.id, "employee");
         const refreshToken = generateRefreshToken(employee[0]!.id);
 
         await this.repository.createToken(employee[0]!.id, refreshToken);
@@ -76,11 +76,18 @@ export class AuthService {
 
         const tokenData = tokens[0]!;
 
-        const accessToken = generateAccessToken(tokenData.employeeId);
-        const newRefreshToken = generateRefreshToken(tokenData.employeeId);
+        const userResults = await this.repository.findUserById(tokenData.employeeId);
+        if (userResults.length === 0) {
+            throw new Error("Employee not found");
+        }
 
-        await this.repository.deleteToken(refreshToken);
-        await this.repository.createToken(tokenData.employeeId, newRefreshToken);
+        const user = userResults[0]!;
+
+        const accessToken = generateAccessToken(user.id, user.role);
+        const newRefreshToken = generateRefreshToken(user.id);
+
+        await this.repository.revokeToken(refreshToken);
+        await this.repository.createToken(user.id, newRefreshToken);
 
         return {
             access_token: accessToken,
@@ -88,5 +95,9 @@ export class AuthService {
             access_token_expires_in: env.ACCESS_TOKEN_EXPIRES_IN,
             refresh_token_expires_in: env.REFRESH_TOKEN_EXPIRES_IN,
         } satisfies RefreshServiceResponse;
+    }
+
+    async revokeAllTokens(employeeId: number) {
+        await this.repository.revokeAllTokens(employeeId);
     }
 }

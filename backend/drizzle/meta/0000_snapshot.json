@@ -1,5 +1,5 @@
 {
-  "id": "8b99337a-6056-46ef-b750-c34d22c7cab4",
+  "id": "6daca915-8d3f-4762-a5ee-c0540bebd400",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -250,13 +250,13 @@
           "primaryKey": false,
           "notNull": true
         },
-        "status": {
-          "name": "status",
-          "type": "employee_status",
+        "role": {
+          "name": "role",
+          "type": "employee_role",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'active'"
+          "default": "'employee'"
         },
         "password_hash": {
           "name": "password_hash",
@@ -298,6 +298,77 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.employees_bans": {
+      "name": "employees_bans",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "employee_id": {
+          "name": "employee_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "banned_by": {
+          "name": "banned_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "employees_bans_employee_id_employees_id_fk": {
+          "name": "employees_bans_employee_id_employees_id_fk",
+          "tableFrom": "employees_bans",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "employee_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "employees_bans_banned_by_employees_id_fk": {
+          "name": "employees_bans_banned_by_employees_id_fk",
+          "tableFrom": "employees_bans",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "banned_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -694,12 +765,12 @@
         "violation"
       ]
     },
-    "public.employee_status": {
-      "name": "employee_status",
+    "public.employee_role": {
+      "name": "employee_role",
       "schema": "public",
       "values": [
-        "active",
-        "blocked"
+        "admin",
+        "employee"
       ]
     }
   },

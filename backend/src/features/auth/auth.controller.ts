@@ -117,7 +117,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
         async (request, reply) => {
             try {
                 const authService = new AuthService(new AuthRepository());
-                const employee = await authService.getMe(request.user.id);
+                const employee = await authService.getMe(request.user.employeeId);
                 return {
                     employee,
                 };

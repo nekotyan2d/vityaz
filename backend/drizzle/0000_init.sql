@@ -1,6 +1,6 @@
 CREATE TYPE "public"."access_direction" AS ENUM('in', 'out');--> statement-breakpoint
 CREATE TYPE "public"."access_status" AS ENUM('allowed', 'denied', 'violation');--> statement-breakpoint
-CREATE TYPE "public"."employee_status" AS ENUM('active', 'blocked');--> statement-breakpoint
+CREATE TYPE "public"."employee_role" AS ENUM('admin', 'employee');--> statement-breakpoint
 CREATE TABLE "access_log" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"employee_id" integer NOT NULL,
@@ -31,10 +31,18 @@ CREATE TABLE "employees" (
 	"email" varchar(255) NOT NULL,
 	"full_name" varchar(255) NOT NULL,
 	"category_id" integer NOT NULL,
-	"status" "employee_status" DEFAULT 'active' NOT NULL,
+	"role" "employee_role" DEFAULT 'employee' NOT NULL,
 	"password_hash" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "employees_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE "employees_bans" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"employee_id" integer NOT NULL,
+	"reason" varchar(255) NOT NULL,
+	"banned_by" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "floors" (
@@ -86,6 +94,8 @@ ALTER TABLE "access_log" ADD CONSTRAINT "access_log_room_id_rooms_id_fk" FOREIGN
 ALTER TABLE "category_access_rules" ADD CONSTRAINT "category_access_rules_category_id_employee_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."employee_categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "category_access_rules" ADD CONSTRAINT "category_access_rules_room_type_id_room_types_id_fk" FOREIGN KEY ("room_type_id") REFERENCES "public"."room_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "employees" ADD CONSTRAINT "employees_category_id_employee_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."employee_categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "employees_bans" ADD CONSTRAINT "employees_bans_employee_id_employees_id_fk" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "employees_bans" ADD CONSTRAINT "employees_bans_banned_by_employees_id_fk" FOREIGN KEY ("banned_by") REFERENCES "public"."employees"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "personal_access" ADD CONSTRAINT "personal_access_employee_id_employees_id_fk" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "personal_access" ADD CONSTRAINT "personal_access_room_id_rooms_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."rooms"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_employee_id_employees_id_fk" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

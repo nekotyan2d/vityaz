@@ -1,34 +1,31 @@
 import { env } from "@/env";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
-export function generateAccessToken(employeeId: number) {
+export type AccessTokenPayload = {
+    employeeId: number;
+    role: "admin" | "employee";
+};
+
+export function generateAccessToken(employeeId: number, role: "admin" | "employee") {
     return jwt.sign(
-        {
-            id: employeeId,
-        },
+        { employeeId, role } satisfies AccessTokenPayload,
         env.ACCESS_TOKEN_SECRET as Secret,
-        {
-            expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
-        } as SignOptions,
+        { expiresIn: env.ACCESS_TOKEN_EXPIRES_IN } as SignOptions,
     );
 }
 
 export function generateRefreshToken(employeeId: number) {
     return jwt.sign(
-        {
-            id: employeeId,
-        },
+        { employeeId },
         env.REFRESH_TOKEN_SECRET as Secret,
-        {
-            expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
-        } as SignOptions,
+        { expiresIn: env.REFRESH_TOKEN_EXPIRES_IN } as SignOptions,
     );
 }
 
-export function verifyAccessToken(token: string) {
+export function verifyAccessToken(token: string): AccessTokenPayload | null {
     try {
-        return jwt.verify(token, env.ACCESS_TOKEN_SECRET as Secret);
-    } catch (err) {
+        return jwt.verify(token, env.ACCESS_TOKEN_SECRET as Secret) as AccessTokenPayload;
+    } catch {
         return null;
     }
 }
@@ -36,7 +33,7 @@ export function verifyAccessToken(token: string) {
 export function verifyRefreshToken(token: string) {
     try {
         return jwt.verify(token, env.REFRESH_TOKEN_SECRET as Secret);
-    } catch (err) {
+    } catch {
         return null;
     }
 }

@@ -1,7 +1,7 @@
 import { pgTable, serial, varchar, integer, timestamp, uuid, pgEnum, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-export const employeeStatusEnum = pgEnum("employee_status", ["active", "blocked"]);
+export const employeeRoleEnum = pgEnum("employee_role", ["admin", "employee"]);
 
 export const accessDirectionEnum = pgEnum("access_direction", ["in", "out"]);
 
@@ -48,8 +48,20 @@ export const employees = pgTable("employees", {
     categoryId: integer("category_id")
         .notNull()
         .references(() => employeeCategories.id),
-    status: employeeStatusEnum("status").notNull().default("active"),
+    role: employeeRoleEnum("role").notNull().default("employee"),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const employeesBans = pgTable("employees_bans", {
+    id: serial("id").primaryKey(),
+    employeeId: integer("employee_id")
+        .notNull()
+        .references(() => employees.id),
+    reason: varchar("reason", { length: 255 }).notNull(),
+    bannedBy: integer("banned_by")
+        .notNull()
+        .references(() => employees.id),
     createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -152,9 +164,24 @@ export const employeesRelations = relations(employees, ({ one, many }) => ({
         fields: [employees.categoryId],
         references: [employeeCategories.id],
     }),
+    bans: many(employeesBans, { relationName: "bannedEmployee" }),
+    issuedBans: many(employeesBans, { relationName: "banIssuer" }),
     personalAccess: many(personalAccess),
     accessLog: many(accessLog),
     refreshTokens: many(refreshTokens),
+}));
+
+export const employeesBansRelations = relations(employeesBans, ({ one }) => ({
+    employee: one(employees, {
+        fields: [employeesBans.employeeId],
+        references: [employees.id],
+        relationName: "bannedEmployee",
+    }),
+    bannedByEmployee: one(employees, {
+        fields: [employeesBans.bannedBy],
+        references: [employees.id],
+        relationName: "banIssuer",
+    }),
 }));
 
 export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
