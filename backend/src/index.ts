@@ -8,6 +8,7 @@ import { env } from "@/env";
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { registerAuthRoutes } from "./features/auth/auth.controller";
 import { registerEmployeeRoutes } from "./features/employee/employee.controller";
+import { registerBuildingRoutes } from "./features/building/building.controller";
 import { injectSecurity } from "./utils/security-injector";
 
 const app = fastify();
@@ -57,6 +58,7 @@ app.after(() => {
     injectSecurity(app);
     registerAuthRoutes(app);
     registerEmployeeRoutes(app);
+    registerBuildingRoutes(app);
 });
 
 app.listen({ port: PORT }, (err, address) => {
