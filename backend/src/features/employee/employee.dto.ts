@@ -5,6 +5,7 @@ export const Employee = z.object({
     full_name: z.string(),
     email: z.email(),
     category: z.string(),
+    role: z.enum(["admin", "employee"]),
     created_at: z.date(),
 });
 
@@ -17,3 +18,19 @@ export const GetEmployeesResponseSchema = z.object({
 export const GetEmployeeByIdResponseSchema = z.object({
     employee: Employee,
 });
+
+export const CreateEmployeeRequestSchema = z.object({
+    email: z.email(),
+    full_name: z.string().min(2),
+    password: z.string().min(6),
+    category_id: z.number().int().positive(),
+    role: z.enum(["admin", "employee"]).optional().default("employee"),
+});
+
+export type CreateEmployeeRequest = z.infer<typeof CreateEmployeeRequestSchema>;
+
+export const BanEmployeeRequestSchema = z.object({
+    reason: z.string().min(1).max(255),
+});
+
+export type BanEmployeeRequest = z.infer<typeof BanEmployeeRequestSchema>;

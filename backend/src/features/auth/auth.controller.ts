@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { GetMeSchema, LoginSchema, RefreshSchema, RegisterSchema } from "./auth.schema";
+import { GetMeSchema, LoginSchema, LogoutSchema, RefreshSchema, RegisterSchema } from "./auth.schema";
 import { authenticate } from "@/middleware/authenticate";
 import type { LoginRequestBody, RegisterRequestBody } from "./auth.dto";
 import { AuthService } from "./auth.service";
@@ -38,7 +38,9 @@ export function registerAuthRoutes(app: FastifyInstance) {
                         ok: true,
                     });
             } catch (error) {
-                // TODO: сделать нормальную обработку ошибок
+                if (error instanceof Error && error.message === "Учётная запись заблокирована") {
+                    return reply.status(403).send({ message: error.message });
+                }
                 return reply.status(401).send({ message: "Invalid email or password" });
             }
         },
@@ -68,7 +70,6 @@ export function registerAuthRoutes(app: FastifyInstance) {
                         ok: true,
                     });
             } catch (error) {
-                // TODO: сделать нормальную обработку ошибок
                 return reply.status(400).send({ message: "Error occurred while registering user" });
             }
         },
@@ -102,9 +103,36 @@ export function registerAuthRoutes(app: FastifyInstance) {
                         ok: true,
                     });
             } catch (error) {
-                // TODO: сделать нормальную обработку ошибок
+                if (error instanceof Error && error.message === "Учётная запись заблокирована") {
+                    return reply
+                        .clearCookie("access_token", { path: "/" })
+                        .clearCookie("refresh_token", { path: "/" })
+                        .status(403)
+                        .send({ message: error.message });
+                }
                 return reply.status(401).send({ message: "Invalid refresh token" });
             }
+        },
+    );
+
+    app.withTypeProvider<ZodTypeProvider>().post(
+        "/auth/logout",
+        {
+            schema: LogoutSchema,
+        },
+        async (request, reply) => {
+            const refresh_token = request.cookies.refresh_token;
+
+            if (refresh_token) {
+                const authService = new AuthService(new AuthRepository());
+                await authService.logout(refresh_token);
+            }
+
+            return reply
+                .clearCookie("access_token", { path: "/" })
+                .clearCookie("refresh_token", { path: "/" })
+                .status(204)
+                .send();
         },
     );
 
@@ -122,7 +150,6 @@ export function registerAuthRoutes(app: FastifyInstance) {
                     employee,
                 };
             } catch (error) {
-                // TODO: сделать нормальную обработку ошибок
                 return reply.status(404).send({ message: "User not found" });
             }
         },

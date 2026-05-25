@@ -1,7 +1,12 @@
+import { createHash } from "crypto";
 import { db } from "@/db/client";
-import { employees, refreshTokens } from "@/db/schema";
+import { employees, employeesBans, refreshTokens } from "@/db/schema";
 import { env } from "@/env";
 import { and, eq, isNull, gt } from "drizzle-orm";
+
+function hashToken(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
+}
 
 export class AuthRepository {
     constructor() {}
@@ -30,10 +35,18 @@ export class AuthRepository {
             .where(eq(employees.id, id));
     }
 
+    async findActiveBan(employeeId: number) {
+        return db
+            .select({ id: employeesBans.id })
+            .from(employeesBans)
+            .where(eq(employeesBans.employeeId, employeeId))
+            .limit(1);
+    }
+
     async createToken(employeeId: number, refreshToken: string) {
         await db.insert(refreshTokens).values({
             employeeId,
-            token: refreshToken,
+            token: hashToken(refreshToken),
             expiresAt: new Date(Date.now() + env.REFRESH_TOKEN_EXPIRES_IN * 1000),
         });
     }
@@ -44,7 +57,7 @@ export class AuthRepository {
             .from(refreshTokens)
             .where(
                 and(
-                    eq(refreshTokens.token, token),
+                    eq(refreshTokens.token, hashToken(token)),
                     isNull(refreshTokens.revokedAt),
                     gt(refreshTokens.expiresAt, new Date()),
                 ),
@@ -55,7 +68,7 @@ export class AuthRepository {
         await db
             .update(refreshTokens)
             .set({ revokedAt: new Date() })
-            .where(eq(refreshTokens.token, token));
+            .where(eq(refreshTokens.token, hashToken(token)));
     }
 
     async revokeAllTokens(employeeId: number) {

@@ -14,25 +14,9 @@ export function generateAccessToken(employeeId: number, role: "admin" | "employe
     );
 }
 
-export function generateRefreshToken(employeeId: number) {
-    return jwt.sign(
-        { employeeId },
-        env.REFRESH_TOKEN_SECRET as Secret,
-        { expiresIn: env.REFRESH_TOKEN_EXPIRES_IN } as SignOptions,
-    );
-}
-
 export function verifyAccessToken(token: string): AccessTokenPayload | null {
     try {
         return jwt.verify(token, env.ACCESS_TOKEN_SECRET as Secret) as AccessTokenPayload;
-    } catch {
-        return null;
-    }
-}
-
-export function verifyRefreshToken(token: string) {
-    try {
-        return jwt.verify(token, env.REFRESH_TOKEN_SECRET as Secret);
     } catch {
         return null;
     }

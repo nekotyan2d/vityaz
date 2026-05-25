@@ -34,3 +34,8 @@ export const GetMeSchema: FastifySchema = {
         200: GetMeResponseSchema,
     },
 };
+
+export const LogoutSchema: FastifySchema = {
+    description: "Logout",
+    tags: ["auth"],
+};

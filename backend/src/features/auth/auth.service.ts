@@ -1,6 +1,7 @@
+import { randomBytes } from "crypto";
 import { comparePassword, hashPassword } from "@/utils/pass";
 import type { AuthRepository } from "./auth.repository";
-import { generateAccessToken, generateRefreshToken } from "@/utils/jwt";
+import { generateAccessToken } from "@/utils/jwt";
 import type { LoginServiceResponse, RefreshServiceResponse, RegisterServiceResponse } from "./auth.dto";
 import { env } from "@/env";
 import { EmployeeService } from "../employee/employee.service";
@@ -19,13 +20,18 @@ export class AuthService {
 
         const user = results[0]!;
 
+        const bans = await this.repository.findActiveBan(user.id);
+        if (bans.length > 0) {
+            throw new Error("Учётная запись заблокирована");
+        }
+
         const isValid = await comparePassword(password, user.passwordHash);
         if (!isValid) {
             throw new Error("Invalid email or password");
         }
 
         const accessToken = generateAccessToken(user.id, user.role);
-        const refreshToken = generateRefreshToken(user.id);
+        const refreshToken = randomBytes(64).toString("hex");
 
         await this.repository.createToken(user.id, refreshToken);
 
@@ -42,7 +48,7 @@ export class AuthService {
         const employee = await new EmployeeService(new EmployeeRepository()).create({
             email,
             fullName,
-            categoryId: 7, // Гость - категория по умолчанию до назначения роли
+            categoryId: 7,
             passwordHash: hashedPassword,
         });
 
@@ -51,7 +57,7 @@ export class AuthService {
         }
 
         const accessToken = generateAccessToken(employee[0]!.id, "employee");
-        const refreshToken = generateRefreshToken(employee[0]!.id);
+        const refreshToken = randomBytes(64).toString("hex");
 
         await this.repository.createToken(employee[0]!.id, refreshToken);
 
@@ -83,8 +89,14 @@ export class AuthService {
 
         const user = userResults[0]!;
 
+        const bans = await this.repository.findActiveBan(user.id);
+        if (bans.length > 0) {
+            await this.repository.revokeToken(refreshToken);
+            throw new Error("Учётная запись заблокирована");
+        }
+
         const accessToken = generateAccessToken(user.id, user.role);
-        const newRefreshToken = generateRefreshToken(user.id);
+        const newRefreshToken = randomBytes(64).toString("hex");
 
         await this.repository.revokeToken(refreshToken);
         await this.repository.createToken(user.id, newRefreshToken);
@@ -95,6 +107,10 @@ export class AuthService {
             access_token_expires_in: env.ACCESS_TOKEN_EXPIRES_IN,
             refresh_token_expires_in: env.REFRESH_TOKEN_EXPIRES_IN,
         } satisfies RefreshServiceResponse;
+    }
+
+    async logout(refreshToken: string) {
+        await this.repository.revokeToken(refreshToken);
     }
 
     async revokeAllTokens(employeeId: number) {
