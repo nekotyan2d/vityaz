@@ -11,6 +11,7 @@ import { registerEmployeeRoutes } from "./features/employee/employee.controller"
 import { registerBuildingRoutes } from "./features/building/building.controller";
 import { registerAccessRoutes } from "./features/access/access.controller";
 import { registerSseRoutes } from "./features/sse/sse.controller";
+import { registerDictionaryRoutes } from "./features/dictionary/dictionary.controller";
 import { injectSecurity } from "./utils/security-injector";
 
 const app = fastify();
@@ -63,6 +64,7 @@ app.after(() => {
     registerBuildingRoutes(app);
     registerAccessRoutes(app);
     registerSseRoutes(app);
+    registerDictionaryRoutes(app);
 });
 
 app.listen({ port: PORT }, (err, address) => {
