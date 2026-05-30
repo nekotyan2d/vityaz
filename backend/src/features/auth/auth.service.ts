@@ -56,7 +56,12 @@ export class AuthService {
             throw new Error("Failed to create user");
         }
 
-        const accessToken = generateAccessToken(employee[0]!.id, "employee");
+        const newEmployee = await this.repository.findUserById(employee[0]!.id);
+        if (!newEmployee || newEmployee.length === 0) {
+            throw new Error("Failed to retrieve created user");
+        }
+
+        const accessToken = generateAccessToken(employee[0]!.id, newEmployee[0]!.role);
         const refreshToken = randomBytes(64).toString("hex");
 
         await this.repository.createToken(employee[0]!.id, refreshToken);

@@ -9,11 +9,11 @@ async function main() {
     await db
         .insert(employeeCategories)
         .values([
-            { id: 1, name: "Администрация", description: "Ректорат и административный персонал" },
+            { id: 1, name: "Администрация", description: "Ректорат и административный персонал", role: "admin" },
             { id: 2, name: "Преподаватель", description: "Профессорско-преподавательский состав" },
             { id: 3, name: "Аспирант", description: "Аспиранты и научные сотрудники" },
             { id: 4, name: "Студент", description: "Студенты очной и заочной формы" },
-            { id: 5, name: "Охрана", description: "Служба безопасности университета" },
+            { id: 5, name: "Охрана", description: "Служба безопасности университета", role: "security" },
             { id: 6, name: "Технический персонал", description: "Обслуживающий и технический персонал" },
             { id: 7, name: "Гость", description: "Пользователь без назначенной роли — ограниченный доступ" },
         ])
@@ -44,7 +44,6 @@ async function main() {
                 fullName: "Админов Админ Админович",
                 passwordHash: await hashPassword("admin123"),
                 categoryId: 1,
-                role: "admin",
             },
         ])
         .onConflictDoNothing();

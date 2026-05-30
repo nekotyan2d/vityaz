@@ -55,7 +55,7 @@ export function registerEmployeeRoutes(app: FastifyInstance) {
         },
         async (request, reply) => {
             try {
-                const { email, full_name, password, category_id, role } = request.body as CreateEmployeeRequest;
+                const { email, full_name, password, category_id } = request.body as CreateEmployeeRequest;
                 const passwordHash = await hashPassword(password);
 
                 const employeeService = new EmployeeService(new EmployeeRepository());
@@ -64,7 +64,6 @@ export function registerEmployeeRoutes(app: FastifyInstance) {
                     fullName: full_name,
                     categoryId: category_id,
                     passwordHash,
-                    role,
                 });
 
                 if (!result || result.length === 0) {

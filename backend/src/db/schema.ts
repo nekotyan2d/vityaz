@@ -1,7 +1,7 @@
 import { pgTable, serial, varchar, integer, timestamp, uuid, pgEnum, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-export const employeeRoleEnum = pgEnum("employee_role", ["admin", "employee"]);
+export const employeeRoleEnum = pgEnum("employee_role", ["admin", "security", "employee"]);
 
 export const accessDirectionEnum = pgEnum("access_direction", ["in", "out"]);
 
@@ -11,6 +11,7 @@ export const employeeCategories = pgTable("employee_categories", {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 100 }).notNull().unique(),
     description: varchar("description", { length: 255 }),
+    role: employeeRoleEnum("employee_role").notNull().default("employee"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -48,7 +49,6 @@ export const employees = pgTable("employees", {
     categoryId: integer("category_id")
         .notNull()
         .references(() => employeeCategories.id),
-    role: employeeRoleEnum("role").notNull().default("employee"),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
 });

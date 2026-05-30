@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { authenticate } from "@/middleware/authenticate";
 import { adminOnly } from "@/middleware/admin-only";
+import { securityOrAdmin } from "@/middleware/security-or-admin";
 import { AccessService } from "./access.service";
 import { AccessRepository } from "./access.repository";
 import {
@@ -37,7 +38,7 @@ export function registerAccessRoutes(app: FastifyInstance) {
 
     app.withTypeProvider<ZodTypeProvider>().get(
         "/access/log",
-        { preHandler: [authenticate, adminOnly], schema: GetAccessLogSchema },
+        { preHandler: [authenticate, securityOrAdmin], schema: GetAccessLogSchema },
         async (request, reply) => {
             try {
                 const filters = request.query as AccessLogFilters;
@@ -67,7 +68,7 @@ export function registerAccessRoutes(app: FastifyInstance) {
 
     app.withTypeProvider<ZodTypeProvider>().get(
         "/access-matrix",
-        { preHandler: [authenticate, adminOnly], schema: GetAccessMatrixSchema },
+        { preHandler: [authenticate, securityOrAdmin], schema: GetAccessMatrixSchema },
         async (_request, reply) => {
             try {
                 const service = new AccessService(new AccessRepository());

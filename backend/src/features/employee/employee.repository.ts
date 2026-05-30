@@ -12,7 +12,7 @@ export class EmployeeRepository {
                 id: employees.id,
                 email: employees.email,
                 full_name: employees.fullName,
-                role: employees.role,
+                role: employeeCategories.role,
                 category: employeeCategories.name,
                 created_at: employees.createdAt,
             })
@@ -26,7 +26,7 @@ export class EmployeeRepository {
                 id: employees.id,
                 email: employees.email,
                 full_name: employees.fullName,
-                role: employees.role,
+                role: employeeCategories.role,
                 category: employeeCategories.name,
                 created_at: employees.createdAt,
             })
@@ -37,11 +37,7 @@ export class EmployeeRepository {
     }
 
     async findByEmail(email: string) {
-        const result = await db
-            .select({ id: employees.id })
-            .from(employees)
-            .where(eq(employees.email, email))
-            .limit(1);
+        const result = await db.select({ id: employees.id }).from(employees).where(eq(employees.email, email)).limit(1);
         return result[0] ?? null;
     }
 
@@ -59,7 +55,6 @@ export class EmployeeRepository {
         fullName: string;
         categoryId: number;
         passwordHash: string;
-        role?: "admin" | "employee";
     }) {
         const result = await db
             .insert(employees)
@@ -68,7 +63,6 @@ export class EmployeeRepository {
                 fullName: data.fullName,
                 categoryId: data.categoryId,
                 passwordHash: data.passwordHash,
-                role: data.role ?? "employee",
             })
             .returning({ id: employees.id });
         return result;

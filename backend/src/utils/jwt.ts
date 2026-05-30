@@ -3,10 +3,10 @@ import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
 export type AccessTokenPayload = {
     employeeId: number;
-    role: "admin" | "employee";
+    role: "admin" | "employee" | "security";
 };
 
-export function generateAccessToken(employeeId: number, role: "admin" | "employee") {
+export function generateAccessToken(employeeId: number, role: "admin" | "employee" | "security") {
     return jwt.sign(
         { employeeId, role } satisfies AccessTokenPayload,
         env.ACCESS_TOKEN_SECRET as Secret,

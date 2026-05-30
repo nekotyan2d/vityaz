@@ -20,7 +20,6 @@ export class EmployeeService {
         fullName: string;
         categoryId: number;
         passwordHash: string;
-        role?: "admin" | "employee";
     }) {
         const existing = await this.repository.findByEmail(data.email);
         if (existing) {

@@ -4,7 +4,7 @@ declare module "fastify" {
     interface FastifyRequest {
         user: {
             employeeId: number;
-            role: "admin" | "employee";
+            role: "admin" | "employee" | "security";
         };
     }
 }

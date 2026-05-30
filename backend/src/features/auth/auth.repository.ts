@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { db } from "@/db/client";
-import { employees, employeesBans, refreshTokens } from "@/db/schema";
+import { employeeCategories, employees, employeesBans, refreshTokens } from "@/db/schema";
 import { env } from "@/env";
 import { and, eq, isNull, gt } from "drizzle-orm";
 
@@ -16,10 +16,11 @@ export class AuthRepository {
             .select({
                 id: employees.id,
                 email: employees.email,
-                role: employees.role,
+                role: employeeCategories.role,
                 passwordHash: employees.passwordHash,
             })
             .from(employees)
+            .innerJoin(employeeCategories, eq(employees.categoryId, employeeCategories.id))
             .where(eq(employees.email, email));
     }
 
@@ -28,10 +29,11 @@ export class AuthRepository {
             .select({
                 id: employees.id,
                 email: employees.email,
-                role: employees.role,
+                role: employeeCategories.role,
                 passwordHash: employees.passwordHash,
             })
             .from(employees)
+            .innerJoin(employeeCategories, eq(employees.categoryId, employeeCategories.id))
             .where(eq(employees.id, id));
     }
 
