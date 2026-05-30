@@ -16,6 +16,7 @@ button {
     cursor: pointer;
     font-weight: bold;
     width: fit-content;
+    font-family: inherit;
 
     &:disabled {
         opacity: 0.6;

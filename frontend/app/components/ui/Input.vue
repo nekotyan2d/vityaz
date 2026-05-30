@@ -61,6 +61,7 @@ watch(
         height: 40px;
         font-size: 16px;
         outline: none;
+        font-family: inherit;
 
         &::placeholder {
             color: var(--color-input-placeholder);
