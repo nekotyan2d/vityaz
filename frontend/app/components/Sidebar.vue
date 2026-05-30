@@ -77,6 +77,7 @@ nav {
     padding: 16px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 
     .logo {
         color: var(--color-primary);

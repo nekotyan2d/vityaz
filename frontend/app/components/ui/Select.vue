@@ -1,19 +1,21 @@
 <template>
-    <UiPopupMenu
-        :items="options"
-        :model-value="model"
-        @select="model = $event.value">
-        <template #trigger>
-            <div
-                class="select-trigger"
-                :data-placeholder="model === undefined || model === null || model === ''">
-                <span>{{ selectedLabel }}</span>
-                <Icon
-                    name="material-symbols:keyboard-arrow-down-rounded"
-                    :size="20" />
-            </div>
-        </template>
-    </UiPopupMenu>
+    <div class="select-wrapper">
+        <UiPopupMenu
+            :items="options"
+            :model-value="model"
+            @select="model = $event.value">
+            <template #trigger>
+                <div
+                    class="select-trigger"
+                    :data-placeholder="model === undefined || model === null || model === ''">
+                    <span>{{ selectedLabel }}</span>
+                    <Icon
+                        name="material-symbols:keyboard-arrow-down-rounded"
+                        :size="20" />
+                </div>
+            </template>
+        </UiPopupMenu>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -33,6 +35,10 @@ const selectedLabel = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+.select-wrapper {
+    width: 100%;
+}
+
 .select-trigger {
     display: flex;
     align-items: center;

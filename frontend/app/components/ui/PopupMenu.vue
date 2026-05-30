@@ -5,9 +5,12 @@
         <div @click="toggle">
             <slot name="trigger" />
         </div>
-        <Transition name="popup-menu">
+        <Transition
+            name="popup-menu"
+            @after-leave="alignRight = false">
             <div
                 v-if="open"
+                ref="menuRef"
                 class="popup-menu">
                 <button
                     v-for="item in items"
@@ -51,7 +54,9 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
+const alignRight = ref(false);
 const wrapperRef = ref<HTMLElement | null>(null);
+const menuRef = ref<HTMLElement | null>(null);
 
 function toggle() {
     open.value = !open.value;
@@ -68,6 +73,14 @@ function onOutsideClick(e: MouseEvent) {
     }
 }
 
+watch(open, async (isOpen) => {
+    if (!isOpen) return;
+    await nextTick();
+    if (!menuRef.value) return;
+    const rect = menuRef.value.getBoundingClientRect();
+    alignRight.value = rect.right > window.innerWidth;
+});
+
 onMounted(() => document.addEventListener("mousedown", onOutsideClick));
 onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick));
 </script>
@@ -75,14 +88,15 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick))
 <style lang="scss" scoped>
 .popup-menu-wrapper {
     position: relative;
-    width: 100%;
+    width: fit-content;
 }
 
 .popup-menu {
     position: absolute;
     top: v-bind("props.placement === 'top' ? 'auto' : 'calc(100% + 4px)'");
     bottom: v-bind("props.placement === 'top' ? 'calc(100% + 4px)' : 'auto'");
-    left: 0;
+    left: v-bind("alignRight ? 'auto' : '0'");
+    right: v-bind("alignRight ? '0' : 'auto'");
     width: max-content;
     min-width: 100%;
     background-color: var(--color-background);
