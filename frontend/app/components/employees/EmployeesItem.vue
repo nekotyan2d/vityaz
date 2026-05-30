@@ -35,7 +35,9 @@ const emit = defineEmits<{
     (e: "ban", employee: Employee): void;
 }>();
 
-const actions: MenuItem[] = [{ label: "Заблокировать", value: "ban" }];
+const actions: MenuItem[] = [
+    { label: "Заблокировать", value: "ban", icon: "material-symbols:person-off-outline-rounded" },
+];
 
 function onAction(item: MenuItem) {
     if (item.value === "ban") {

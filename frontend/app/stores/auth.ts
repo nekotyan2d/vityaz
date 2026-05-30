@@ -1,10 +1,12 @@
 import { defineStore } from "pinia";
-// Use runtime `window` check instead of Nuxt-specific helpers to avoid TS node type issues
+import type { paths } from "@/api/types";
+
+type CurrentUser = paths["/auth/me"]["get"]["responses"]["200"]["content"]["application/json"]["employee"];
 
 export const useAuthStore = defineStore("auth", () => {
     const api = useApi();
 
-    const currentUser = ref<any | null>(null);
+    const currentUser = ref<CurrentUser | null>(null);
 
     const isAuthenticated = ref(false);
 
@@ -25,8 +27,7 @@ export const useAuthStore = defineStore("auth", () => {
                 return { ok: false };
             }
 
-            // `res.data` is a plain POJO containing the API response (e.g. { employee: {...} })
-            currentUser.value = (res.data as any).employee ?? res.data;
+            currentUser.value = res.data.employee;
             isAuthenticated.value = true;
             return { ok: true, data: res.data };
         } catch (error) {
@@ -75,8 +76,12 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     async function logout() {
-        currentUser.value = null;
-        isAuthenticated.value = false;
+        try {
+            await api.POST("/auth/logout", {});
+        } finally {
+            currentUser.value = null;
+            isAuthenticated.value = false;
+        }
     }
 
     async function init() {

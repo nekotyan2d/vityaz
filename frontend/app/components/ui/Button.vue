@@ -1,9 +1,14 @@
 <template>
-    <button :disabled="props.disabled"><slot /></button>
+    <button
+        :disabled="props.disabled"
+        :data-variant="props.variant ?? 'default'">
+        <slot />
+    </button>
 </template>
 <script lang="ts" setup>
 const props = defineProps<{
     disabled?: boolean;
+    variant?: "default" | "danger";
 }>();
 </script>
 <style lang="scss" scoped>
@@ -17,6 +22,10 @@ button {
     font-weight: bold;
     width: fit-content;
     font-family: inherit;
+
+    &[data-variant="danger"] {
+        background-color: #c62828;
+    }
 
     &:disabled {
         opacity: 0.6;

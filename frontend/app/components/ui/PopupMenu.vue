@@ -13,10 +13,17 @@
                     v-for="item in items"
                     :key="item.value"
                     class="popup-menu__item"
-                    :class="{ 'popup-menu__item--active': modelValue === item.value }"
+                    :class="{
+                        'popup-menu__item--active': modelValue === item.value,
+                        'popup-menu__item--danger': item.danger,
+                    }"
                     :disabled="item.disabled"
                     type="button"
                     @click="onSelect(item)">
+                    <Icon
+                        v-if="item.icon"
+                        :name="item.icon"
+                        :size="18" />
                     {{ item.label }}
                 </button>
             </div>
@@ -28,12 +35,15 @@
 export interface MenuItem {
     label: string;
     value: string | number;
+    icon?: string;
+    danger?: boolean;
     disabled?: boolean;
 }
 
 const props = defineProps<{
     items: MenuItem[];
     modelValue?: unknown;
+    placement?: "bottom" | "top";
 }>();
 
 const emit = defineEmits<{
@@ -70,7 +80,8 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick))
 
 .popup-menu {
     position: absolute;
-    top: calc(100% + 4px);
+    top: v-bind("props.placement === 'top' ? 'auto' : 'calc(100% + 4px)'");
+    bottom: v-bind("props.placement === 'top' ? 'calc(100% + 4px)' : 'auto'");
     left: 0;
     width: max-content;
     min-width: 100%;
@@ -84,7 +95,9 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick))
     overflow-y: auto;
 
     &__item {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         width: 100%;
         padding: 8px 12px;
         background: none;
@@ -103,6 +116,14 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick))
             color: var(--color-primary);
             background-color: var(--color-ripple);
             font-weight: 600;
+        }
+
+        &--danger {
+            color: #c62828;
+
+            &:hover:not(:disabled) {
+                background-color: color-mix(in srgb, #c62828 10%, transparent);
+            }
         }
 
         &:disabled {
