@@ -80,9 +80,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     async function init() {
-        if (!import.meta.server) {
-            await loadCurrentUser();
-        }
+        await loadCurrentUser();
         _initResolve();
     }
 

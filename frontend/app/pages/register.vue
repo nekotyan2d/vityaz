@@ -20,7 +20,7 @@
             Есть аккаунт?
             <NuxtLink :to="{ name: 'index' }">Войти</NuxtLink>
         </div>
-        <UiButton :disabled="!!models.email.error || !!models.password.error">Зарегистрироваться</UiButton>
+        <UiButton :disabled="!!models.fullName.error || !!models.email.error || !!models.password.error">Зарегистрироваться</UiButton>
     </form>
 </template>
 <script lang="ts" setup>
@@ -29,6 +29,8 @@ import z from "zod";
 definePageMeta({
     layout: "auth",
 });
+
+const authStore = useAuthStore();
 
 const models = ref({
     fullName: {
@@ -57,9 +59,20 @@ const schemas = {
     password: z.string().min(6, { message: "Пароль должен быть не менее 6 символов" }),
 };
 
-function onSubmit() {
-    if (models.value.email.error || models.value.password.error) {
+async function onSubmit() {
+    if (models.value.fullName.error || models.value.email.error || models.value.password.error) {
         return;
+    }
+
+    try {
+        await authStore.register({
+            email: models.value.email.value,
+            fullName: models.value.fullName.value,
+            password: models.value.password.value,
+        });
+        navigateTo({ name: "home" });
+    } catch (error) {
+        console.error(error);
     }
 }
 </script>

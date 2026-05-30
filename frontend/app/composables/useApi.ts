@@ -23,13 +23,15 @@ async function refreshSession() {
 }
 
 export function useApi() {
+    const ssrCookies = import.meta.server ? useRequestHeaders(["cookie"]) : {};
+
     const client = createClient<paths>({
         baseUrl: API_BASE_URL,
         fetch: async (input: Request) => {
             const request = input.clone();
             const response = await fetch(request);
 
-            const isAuthEndpoint = request.url.includes("/auth/login") || request.url.includes("/auth/register") || request.url.includes("/auth/refresh");
+            const isAuthEndpoint = input.url.includes("/auth/login") || input.url.includes("/auth/register") || input.url.includes("/auth/refresh");
 
             if (response.status !== 401 || isAuthEndpoint) {
                 return response;
@@ -41,15 +43,23 @@ export function useApi() {
                 return response;
             }
 
-            return fetch(request.clone());
+            return fetch(input.clone());
         },
     });
 
     client.use({
         onRequest({ request }) {
-            return new Request(request, {
-                credentials: "include",
-            });
+            const headers = new Headers(request.headers);
+            if (import.meta.server && ssrCookies.cookie) {
+                headers.set("cookie", ssrCookies.cookie);
+            }
+            return new Request(request, { credentials: "include", headers });
+        },
+        async onResponse({ response }) {
+            if (!response.ok) {
+                const body = await response.clone().json().catch(() => ({}));
+                throw new Error(body?.message ?? `HTTP ${response.status}`);
+            }
         },
     });
 
