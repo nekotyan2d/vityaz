@@ -203,7 +203,7 @@ export interface paths {
                                 email: string;
                                 category: string;
                                 /** @enum {string} */
-                                role: "admin" | "employee";
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             };
@@ -251,7 +251,7 @@ export interface paths {
                                 email: string;
                                 category: string;
                                 /** @enum {string} */
-                                role: "admin" | "employee";
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             }[];
@@ -277,11 +277,6 @@ export interface paths {
                         full_name: string;
                         password: string;
                         category_id: number;
-                        /**
-                         * @default employee
-                         * @enum {string}
-                         */
-                        role?: "admin" | "employee";
                     };
                 };
             };
@@ -300,7 +295,7 @@ export interface paths {
                                 email: string;
                                 category: string;
                                 /** @enum {string} */
-                                role: "admin" | "employee";
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             };
@@ -348,7 +343,7 @@ export interface paths {
                                 email: string;
                                 category: string;
                                 /** @enum {string} */
-                                role: "admin" | "employee";
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             };

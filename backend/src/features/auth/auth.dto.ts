@@ -29,7 +29,7 @@ export const LoginRequestBodySchema = z.object({
 
 export const RegisterRequestBodySchema = z.object({
     email: z.email(),
-    full_name: z.string().min(3),
+    full_name: z.string().regex(/^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/, "ФИО должно быть в формате Фамилия Имя Отчество"),
     password: z.string().min(6),
 });
 

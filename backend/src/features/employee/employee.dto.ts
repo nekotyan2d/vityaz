@@ -21,7 +21,7 @@ export const GetEmployeeByIdResponseSchema = z.object({
 
 export const CreateEmployeeRequestSchema = z.object({
     email: z.email(),
-    full_name: z.string().min(2),
+    full_name: z.string().regex(/^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/, "ФИО должно быть в формате Фамилия Имя Отчество"),
     password: z.string().min(6),
     category_id: z.number().int().positive(),
 });
