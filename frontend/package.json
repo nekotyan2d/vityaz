@@ -23,6 +23,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@iconify-json/material-symbols": "^1.2.75",
         "@nuxt/icon": "^2.2.2",
         "openapi-typescript": "^7.13.0"
     }

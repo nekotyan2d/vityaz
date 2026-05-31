@@ -1,4 +1,5 @@
 <template>
+    <NuxtLayout :name="layout">
     <div class="page">
         <h2 class="page-title">Аккаунт</h2>
 
@@ -42,10 +43,14 @@
             </UiButton>
         </div>
     </div>
+    </NuxtLayout>
 </template>
 
 <script lang="ts" setup>
+definePageMeta({ layout: false });
+
 const authStore = useAuthStore();
+const layout = computed(() => authStore.currentUser?.role === "employee" ? "employee" : "default");
 const notifications = useNotificationsStore();
 
 const user = computed(() => authStore.currentUser);

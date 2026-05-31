@@ -5,32 +5,33 @@
         <div @click="toggle">
             <slot name="trigger" />
         </div>
-        <Transition
-            name="popup-menu"
-            @after-leave="alignRight = false">
-            <div
-                v-if="open"
-                ref="menuRef"
-                class="popup-menu">
-                <button
-                    v-for="item in items"
-                    :key="item.value"
-                    class="popup-menu__item"
-                    :class="{
-                        'popup-menu__item--active': modelValue === item.value,
-                        'popup-menu__item--danger': item.danger,
-                    }"
-                    :disabled="item.disabled"
-                    type="button"
-                    @click="onSelect(item)">
-                    <Icon
-                        v-if="item.icon"
-                        :name="item.icon"
-                        :size="18" />
-                    {{ item.label }}
-                </button>
-            </div>
-        </Transition>
+        <Teleport to="body">
+            <Transition name="popup-menu">
+                <div
+                    v-if="open"
+                    ref="menuRef"
+                    class="popup-menu"
+                    :style="menuStyle">
+                    <button
+                        v-for="item in items"
+                        :key="item.value"
+                        class="popup-menu__item"
+                        :class="{
+                            'popup-menu__item--active': modelValue === item.value,
+                            'popup-menu__item--danger': item.danger,
+                        }"
+                        :disabled="item.disabled"
+                        type="button"
+                        @click="onSelect(item)">
+                        <Icon
+                            v-if="item.icon"
+                            :name="item.icon"
+                            :size="18" />
+                        {{ item.label }}
+                    </button>
+                </div>
+            </Transition>
+        </Teleport>
     </div>
 </template>
 
@@ -54,9 +55,9 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
-const alignRight = ref(false);
 const wrapperRef = ref<HTMLElement | null>(null);
 const menuRef = ref<HTMLElement | null>(null);
+const menuStyle = ref<Record<string, string | undefined>>({});
 
 function toggle() {
     open.value = !open.value;
@@ -68,7 +69,7 @@ function onSelect(item: MenuItem) {
 }
 
 function onOutsideClick(e: MouseEvent) {
-    if (!wrapperRef.value?.contains(e.target as Node)) {
+    if (!wrapperRef.value?.contains(e.target as Node) && !menuRef.value?.contains(e.target as Node)) {
         open.value = false;
     }
 }
@@ -76,9 +77,21 @@ function onOutsideClick(e: MouseEvent) {
 watch(open, async (isOpen) => {
     if (!isOpen) return;
     await nextTick();
-    if (!menuRef.value) return;
-    const rect = menuRef.value.getBoundingClientRect();
-    alignRight.value = rect.right > window.innerWidth;
+    if (!wrapperRef.value || !menuRef.value) return;
+
+    const trigger = wrapperRef.value.getBoundingClientRect();
+    const menu = menuRef.value.getBoundingClientRect();
+    const overflowsRight = trigger.left + menu.width > window.innerWidth;
+
+    const horizontal = overflowsRight
+        ? { right: `${window.innerWidth - trigger.right}px` }
+        : { left: `${trigger.left}px` };
+
+    const vertical = props.placement === "top"
+        ? { bottom: `${window.innerHeight - trigger.top + 4}px` }
+        : { top: `${trigger.bottom + 4}px` };
+
+    menuStyle.value = { position: "fixed", ...horizontal, ...vertical };
 });
 
 onMounted(() => document.addEventListener("mousedown", onOutsideClick));
@@ -90,20 +103,17 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick))
     position: relative;
     width: fit-content;
 }
+</style>
 
+<style lang="scss">
 .popup-menu {
-    position: absolute;
-    top: v-bind("props.placement === 'top' ? 'auto' : 'calc(100% + 4px)'");
-    bottom: v-bind("props.placement === 'top' ? 'calc(100% + 4px)' : 'auto'");
-    left: v-bind("alignRight ? 'auto' : '0'");
-    right: v-bind("alignRight ? '0' : 'auto'");
     width: max-content;
-    min-width: 100%;
+    min-width: 160px;
     background-color: var(--color-background);
     border: 1px solid var(--color-input-border);
     border-radius: 12px;
     padding: 4px;
-    z-index: 50;
+    z-index: 1000;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     max-height: 240px;
     overflow-y: auto;
@@ -120,7 +130,8 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", onOutsideClick))
         text-align: left;
         font-size: 1rem;
         cursor: pointer;
-        color: inherit;
+        color: var(--color-text);
+        font-family: inherit;
 
         &:hover:not(:disabled) {
             background-color: var(--color-ripple);

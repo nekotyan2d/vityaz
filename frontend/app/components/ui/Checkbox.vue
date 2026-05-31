@@ -33,6 +33,7 @@ defineProps<{
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
 
     &--checked {
         border-color: var(--color-primary);

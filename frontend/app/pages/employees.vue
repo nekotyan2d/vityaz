@@ -533,7 +533,7 @@ await Promise.all([loadEmployees(), loadCategories(), loadRooms()]);
     margin-bottom: 20px;
 
     .page-title {
-        margin: 0;
+        margin-bottom: 0;
     }
 
     &__actions {

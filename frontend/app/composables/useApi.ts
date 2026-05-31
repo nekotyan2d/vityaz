@@ -24,10 +24,7 @@ export function useApi() {
     const {
         public: { apiUrl },
     } = useRuntimeConfig();
-    // TODO: убрать прокси для API и юзать полный URL, когда бэкенд будет отдавать куки с правильными доменами. Сейчас это нужно, чтобы куки работали на сервере (в режиме SSR) и клиенте одновременно:
-    // On client: go through Nuxt proxy so Set-Cookie is bound to frontend domain
-    // On server: hit backend directly (cookies forwarded manually from incoming request)
-    const baseUrl = import.meta.server ? apiUrl : "/api";
+    const baseUrl = apiUrl;
     const ssrCookies = import.meta.server ? useRequestHeaders(["cookie"]) : {};
 
     const client = createClient<paths>({

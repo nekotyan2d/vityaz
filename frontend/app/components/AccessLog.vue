@@ -10,6 +10,10 @@
             :key="entry.id"
             class="access-log__entry"
             :data-status="entry.status">
+            <Icon
+                class="access-log__icon"
+                :name="statusIcon(entry.status)"
+                :size="20" />
             <div class="access-log__main">
                 <span class="access-log__name">{{ entry.employee_name }}</span>
                 <span class="access-log__room">{{ entry.room_number }}, этаж {{ entry.floor_number }}</span>
@@ -30,6 +34,12 @@ type LogEntry = paths["/access/log"]["get"]["responses"]["200"]["content"]["appl
 defineProps<{
     entries: LogEntry[];
 }>();
+
+function statusIcon(status: string) {
+    if (status === "allowed") return "material-symbols:check-circle-rounded";
+    if (status === "violation") return "material-symbols:warning-rounded";
+    return "material-symbols:cancel-rounded";
+}
 
 function formatTime(iso: string) {
     return new Date(iso).toLocaleString("ru-RU", {
@@ -55,22 +65,25 @@ function formatTime(iso: string) {
     &__entry {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 12px;
         padding: 12px 16px;
         background-color: var(--color-background-secondary);
         border-radius: 12px;
-        border-left: 4px solid transparent;
+    }
 
-        &[data-status="allowed"] {
-            border-left-color: #4caf50;
+    &__icon {
+        flex-shrink: 0;
+
+        .access-log__entry[data-status="allowed"] & {
+            color: #4caf50;
         }
 
-        &[data-status="denied"] {
-            border-left-color: #f44336;
+        .access-log__entry[data-status="denied"] & {
+            color: #f44336;
         }
 
-        &[data-status="violation"] {
-            border-left-color: #ff9800;
+        .access-log__entry[data-status="violation"] & {
+            color: #ff9800;
         }
     }
 
@@ -78,6 +91,8 @@ function formatTime(iso: string) {
         display: flex;
         flex-direction: column;
         gap: 2px;
+        flex: 1;
+        min-width: 0;
     }
 
     &__name {

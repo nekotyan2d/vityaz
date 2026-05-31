@@ -411,6 +411,10 @@ await Promise.all([loadFloors(), loadRooms(), loadRoomTypes()]);
     grid-template-columns: 1fr 2fr;
     gap: 24px;
     align-items: start;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 .sidebar {

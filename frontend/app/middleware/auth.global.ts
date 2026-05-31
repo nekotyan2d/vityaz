@@ -41,12 +41,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         return navigateTo({ name: "home" });
     }
 
-    if (routeName === "account" && role === "employee") {
-        setPageLayout("employee");
-        return;
-    }
-
-    if (role === "employee" && adminRoutes.includes(routeName)) {
+if (role === "employee" && adminRoutes.includes(routeName)) {
         return navigateTo({ name: "qr" });
     }
 

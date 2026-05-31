@@ -8,13 +8,6 @@ export default defineNuxtConfig({
             apiUrl: process.env.NUXT_PUBLIC_API_URL ?? "http://localhost:8000",
         },
     },
-    nitro: {
-        routeRules: {
-            "/api/**": {
-                proxy: `${process.env.NUXT_PUBLIC_API_URL ?? "http://localhost:8000"}/**`,
-            },
-        },
-    },
     vite: {
         server: {
             allowedHosts: ["localhost", process.env.NUXT_PUBLIC_APP_HOST ?? "localhost:3000"],

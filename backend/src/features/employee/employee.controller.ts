@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { BanEmployeeSchema, CreateEmployeeSchema, GetEmployeeByIdSchema, GetEmployeesSchema, UpdateEmployeeSchema } from "./employee.schema";
 import { authenticate } from "@/middleware/authenticate";
 import { adminOnly } from "@/middleware/admin-only";
+import { securityOrAdmin } from "@/middleware/security-or-admin";
 import { EmployeeService } from "./employee.service";
 import { EmployeeRepository } from "./employee.repository";
 import { hashPassword } from "@/utils/pass";
@@ -12,7 +13,7 @@ export function registerEmployeeRoutes(app: FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().get(
         "/employees",
         {
-            preHandler: [authenticate, adminOnly],
+            preHandler: [authenticate, securityOrAdmin],
             schema: GetEmployeesSchema,
         },
         async (_request, reply) => {
