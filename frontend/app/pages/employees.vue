@@ -16,7 +16,8 @@
             v-if="employees.length"
             :employees="employees"
             @ban="openBan"
-            @edit="openEdit" />
+            @edit="openEdit"
+            @access="openAccess" />
 
         <PopupWindow
             v-if="showCategories"
@@ -121,6 +122,69 @@
         </PopupWindow>
 
         <PopupWindow
+            v-if="accessTarget"
+            :title="`Персональный допуск: ${accessTarget.full_name}`"
+            @close="accessTarget = null">
+            <div class="access-list">
+                <div
+                    v-for="item in personalAccesses"
+                    :key="item.id"
+                    class="access-item">
+                    <div class="access-item__main">
+                        <span class="access-item__room">{{ item.room_number }}</span>
+                        <span class="access-item__sub">{{ item.room_type }}, {{ item.floor_number }} этаж</span>
+                        <span
+                            v-if="item.note"
+                            class="access-item__note">
+                            {{ item.note }}
+                        </span>
+                    </div>
+                    <button
+                        class="revoke-btn"
+                        @click="revokeAccess(item.room_id)">
+                        <Icon
+                            name="material-symbols:close-rounded"
+                            :size="18" />
+                    </button>
+                </div>
+                <p
+                    v-if="!personalAccesses.length"
+                    class="access-empty">
+                    Нет персональных допусков
+                </p>
+            </div>
+
+            <form
+                v-if="showGrantForm"
+                class="popup-form"
+                style="margin-top: 12px"
+                @submit.prevent="submitGrant">
+                <UiSelect
+                    v-model="grantForm.roomId"
+                    :options="availableRoomOptions"
+                    placeholder="Помещение" />
+                <UiInput
+                    v-model="grantForm.note"
+                    :schema="schemas.categoryDescription"
+                    placeholder="Примечание (необязательно)" />
+                <div style="display: flex; gap: 8px">
+                    <UiButton
+                        variant="default"
+                        @click="showGrantForm = false">
+                        Отмена
+                    </UiButton>
+                    <UiButton :disabled="!grantForm.roomId">Выдать</UiButton>
+                </div>
+            </form>
+            <UiButton
+                v-else
+                style="margin-top: 12px"
+                @click="showGrantForm = true">
+                Выдать допуск
+            </UiButton>
+        </PopupWindow>
+
+        <PopupWindow
             v-if="editTarget"
             :title="`Редактировать: ${editTarget.full_name}`"
             @close="editTarget = null">
@@ -183,11 +247,22 @@ const notifications = useNotificationsStore();
 const employees = ref<Employee[]>([]);
 const categories = ref<Category[]>([]);
 
+type Room = paths["/rooms"]["get"]["responses"]["200"]["content"]["application/json"]["rooms"][number];
+type PersonalAccess = paths["/access/personal/{employeeId}"]["get"]["responses"]["200"]["content"]["application/json"]["access"][number];
+
 const showCreate = ref(false);
 const showCategories = ref(false);
 const categoryFormPopup = ref<{ mode: "create" | "edit"; target?: Category } | null>(null);
 const banTarget = ref<Employee | null>(null);
 const editTarget = ref<Employee | null>(null);
+const accessTarget = ref<Employee | null>(null);
+const personalAccesses = ref<PersonalAccess[]>([]);
+const rooms = ref<Room[]>([]);
+const showGrantForm = ref(false);
+const grantForm = ref({
+    roomId: "" as number | "",
+    note: { value: "", error: undefined as string | undefined },
+});
 
 const editForm = ref({
     fullName: { value: "", error: undefined as string | undefined },
@@ -301,6 +376,60 @@ async function submitCategory() {
     }
 }
 
+const availableRoomOptions = computed(() => {
+    const grantedIds = new Set(personalAccesses.value.map((a) => a.room_id));
+    return rooms.value
+        .filter((r) => !grantedIds.has(r.id))
+        .map((r) => ({ label: `${r.number}${r.name ? ` — ${r.name}` : ""}, ${r.floor_number} этаж`, value: r.id }));
+});
+
+async function openAccess(employee: Employee) {
+    accessTarget.value = employee;
+    showGrantForm.value = false;
+    grantForm.value = { roomId: "", note: { value: "", error: undefined } };
+    await loadPersonalAccesses();
+}
+
+async function loadPersonalAccesses() {
+    if (!accessTarget.value) return;
+    const res = await api.GET("/access/personal/{employeeId}", {
+        params: { path: { employeeId: accessTarget.value.id } },
+    });
+    if (res.data) personalAccesses.value = res.data.access;
+}
+
+async function submitGrant() {
+    if (!accessTarget.value || !grantForm.value.roomId) return;
+    try {
+        await api.POST("/access/personal", {
+            body: {
+                employee_id: accessTarget.value.id,
+                room_id: grantForm.value.roomId as number,
+                note: grantForm.value.note.value || undefined,
+            },
+        });
+        notifications.add("success", "Допуск выдан");
+        showGrantForm.value = false;
+        grantForm.value = { roomId: "", note: { value: "", error: undefined } };
+        await loadPersonalAccesses();
+    } catch (e) {
+        notifications.add("error", e instanceof Error ? e.message : "Ошибка");
+    }
+}
+
+async function revokeAccess(roomId: number) {
+    if (!accessTarget.value) return;
+    try {
+        await api.DELETE("/access/personal/{employeeId}/{roomId}", {
+            params: { path: { employeeId: accessTarget.value.id, roomId } },
+        });
+        notifications.add("success", "Допуск отозван");
+        await loadPersonalAccesses();
+    } catch (e) {
+        notifications.add("error", e instanceof Error ? e.message : "Ошибка");
+    }
+}
+
 function openEdit(employee: Employee) {
     const cat = categories.value.find((c) => c.name === employee.category);
     editForm.value = {
@@ -388,7 +517,12 @@ async function submitBan() {
     }
 }
 
-await Promise.all([loadEmployees(), loadCategories()]);
+async function loadRooms() {
+    const res = await api.GET("/rooms");
+    if (res.data) rooms.value = res.data.rooms;
+}
+
+await Promise.all([loadEmployees(), loadCategories(), loadRooms()]);
 </script>
 
 <style lang="scss" scoped>
@@ -486,5 +620,68 @@ await Promise.all([loadEmployees(), loadCategories()]);
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.access-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.access-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background-color: var(--color-background-secondary);
+    border-radius: 12px;
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__room {
+        font-weight: 600;
+    }
+
+    &__sub {
+        font-size: 0.875rem;
+        color: var(--color-text-secondary);
+    }
+
+    &__note {
+        font-size: 0.8125rem;
+        color: var(--color-text-secondary);
+        font-style: italic;
+    }
+}
+
+.revoke-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: 0.2s;
+
+    &:hover {
+        background-color: color-mix(in srgb, #c62828 10%, transparent);
+        color: #c62828;
+    }
+}
+
+.access-empty {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    text-align: center;
+    padding: 12px 0;
 }
 </style>
