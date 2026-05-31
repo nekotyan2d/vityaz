@@ -4,7 +4,8 @@
             v-for="employee in employees"
             :key="employee.id"
             :employee="employee"
-            @ban="$emit('ban', $event)" />
+            @ban="$emit('ban', $event)"
+            @edit="$emit('edit', $event)" />
     </div>
 </template>
 <script lang="ts" setup>
@@ -18,6 +19,7 @@ defineProps<{
 
 defineEmits<{
     (e: "ban", employee: Employee): void;
+    (e: "edit", employee: Employee): void;
 }>();
 </script>
 <style lang="scss" scoped>

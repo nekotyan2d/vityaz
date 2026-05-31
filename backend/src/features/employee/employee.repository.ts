@@ -71,4 +71,13 @@ export class EmployeeRepository {
     async createBan(employeeId: number, reason: string, bannedBy: number) {
         await db.insert(employeesBans).values({ employeeId, reason, bannedBy });
     }
+
+    async update(id: number, data: { fullName?: string; email?: string; categoryId?: number; passwordHash?: string }) {
+        await db.update(employees).set({
+            ...(data.fullName !== undefined && { fullName: data.fullName }),
+            ...(data.email !== undefined && { email: data.email }),
+            ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+            ...(data.passwordHash !== undefined && { passwordHash: data.passwordHash }),
+        }).where(eq(employees.id, id));
+    }
 }

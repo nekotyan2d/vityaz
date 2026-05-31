@@ -15,7 +15,8 @@
         <EmployeesList
             v-if="employees.length"
             :employees="employees"
-            @ban="openBan" />
+            @ban="openBan"
+            @edit="openEdit" />
 
         <PopupWindow
             v-if="showCategories"
@@ -120,6 +121,37 @@
         </PopupWindow>
 
         <PopupWindow
+            v-if="editTarget"
+            :title="`Редактировать: ${editTarget.full_name}`"
+            @close="editTarget = null">
+            <form
+                class="popup-form"
+                @submit.prevent="submitEdit">
+                <UiInput
+                    v-model="editForm.fullName"
+                    :schema="schemas.fullName"
+                    placeholder="ФИО" />
+                <UiInput
+                    v-model="editForm.email"
+                    :schema="schemas.email"
+                    type="email"
+                    placeholder="Почта" />
+                <UiInput
+                    v-model="editForm.password"
+                    :schema="schemas.passwordOptional"
+                    type="password"
+                    placeholder="Новый пароль (необязательно)" />
+                <UiSelect
+                    v-model="editForm.categoryId"
+                    :options="categoryOptions"
+                    placeholder="Категория" />
+                <UiButton :disabled="!!editForm.fullName.error || !!editForm.email.error || !!editForm.password.error">
+                    Сохранить
+                </UiButton>
+            </form>
+        </PopupWindow>
+
+        <PopupWindow
             v-if="banTarget"
             :title="`Заблокировать: ${banTarget.full_name}`"
             @close="closeBan">
@@ -155,6 +187,14 @@ const showCreate = ref(false);
 const showCategories = ref(false);
 const categoryFormPopup = ref<{ mode: "create" | "edit"; target?: Category } | null>(null);
 const banTarget = ref<Employee | null>(null);
+const editTarget = ref<Employee | null>(null);
+
+const editForm = ref({
+    fullName: { value: "", error: undefined as string | undefined },
+    email: { value: "", error: undefined as string | undefined },
+    password: { value: "", error: undefined as string | undefined },
+    categoryId: "" as number | "",
+});
 
 const categoryForm = ref({
     name: { value: "", error: undefined as string | undefined },
@@ -173,6 +213,7 @@ const categoryActions: MenuItem[] = [
 ];
 
 const schemas = {
+    passwordOptional: z.string().min(6, { message: "Минимум 6 символов" }).or(z.literal("")),
     fullName: z
         .string()
         .regex(
@@ -255,6 +296,38 @@ async function submitCategory() {
         }
         categoryFormPopup.value = null;
         await loadCategories();
+    } catch (e) {
+        notifications.add("error", e instanceof Error ? e.message : "Ошибка");
+    }
+}
+
+function openEdit(employee: Employee) {
+    const cat = categories.value.find((c) => c.name === employee.category);
+    editForm.value = {
+        fullName: { value: employee.full_name, error: undefined },
+        email: { value: employee.email, error: undefined },
+        password: { value: "", error: undefined },
+        categoryId: cat?.id ?? "",
+    };
+    editTarget.value = employee;
+}
+
+async function submitEdit() {
+    if (!editTarget.value) return;
+    try {
+        const body: { full_name?: string; email?: string; category_id?: number; password?: string } = {};
+        if (editForm.value.fullName.value !== editTarget.value.full_name) body.full_name = editForm.value.fullName.value;
+        if (editForm.value.email.value !== editTarget.value.email) body.email = editForm.value.email.value;
+        if (editForm.value.categoryId !== "") body.category_id = editForm.value.categoryId as number;
+        if (editForm.value.password.value) body.password = editForm.value.password.value;
+
+        await api.PATCH("/employees/{id}", {
+            params: { path: { id: editTarget.value.id } },
+            body,
+        });
+        notifications.add("success", "Данные сотрудника обновлены");
+        editTarget.value = null;
+        await loadEmployees();
     } catch (e) {
         notifications.add("error", e instanceof Error ? e.message : "Ошибка");
     }

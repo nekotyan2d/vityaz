@@ -33,3 +33,12 @@ export const BanEmployeeRequestSchema = z.object({
 });
 
 export type BanEmployeeRequest = z.infer<typeof BanEmployeeRequestSchema>;
+
+export const UpdateEmployeeRequestSchema = z.object({
+    full_name: z.string().regex(/^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/).optional(),
+    email: z.email().optional(),
+    category_id: z.number().int().positive().optional(),
+    password: z.string().min(6).optional(),
+});
+
+export type UpdateEmployeeRequest = z.infer<typeof UpdateEmployeeRequestSchema>;

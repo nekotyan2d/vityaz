@@ -4,6 +4,7 @@ import {
     CreateEmployeeRequestSchema,
     GetEmployeeByIdResponseSchema,
     GetEmployeesResponseSchema,
+    UpdateEmployeeRequestSchema,
 } from "./employee.dto";
 import z from "zod";
 
@@ -42,4 +43,16 @@ export const BanEmployeeSchema: FastifySchema = {
         id: z.coerce.number(),
     }),
     body: BanEmployeeRequestSchema,
+};
+
+export const UpdateEmployeeSchema: FastifySchema = {
+    description: "Update employee",
+    tags: ["employee"],
+    params: z.object({
+        id: z.coerce.number(),
+    }),
+    body: UpdateEmployeeRequestSchema,
+    response: {
+        200: GetEmployeeByIdResponseSchema,
+    },
 };

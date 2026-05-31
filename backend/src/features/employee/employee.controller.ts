@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { BanEmployeeSchema, CreateEmployeeSchema, GetEmployeeByIdSchema, GetEmployeesSchema } from "./employee.schema";
+import { BanEmployeeSchema, CreateEmployeeSchema, GetEmployeeByIdSchema, GetEmployeesSchema, UpdateEmployeeSchema } from "./employee.schema";
 import { authenticate } from "@/middleware/authenticate";
 import { adminOnly } from "@/middleware/admin-only";
 import { EmployeeService } from "./employee.service";
 import { EmployeeRepository } from "./employee.repository";
 import { hashPassword } from "@/utils/pass";
-import type { BanEmployeeRequest, CreateEmployeeRequest } from "./employee.dto";
+import type { BanEmployeeRequest, CreateEmployeeRequest, UpdateEmployeeRequest } from "./employee.dto";
 
 export function registerEmployeeRoutes(app: FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().get(
@@ -73,6 +73,36 @@ export function registerEmployeeRoutes(app: FastifyInstance) {
                 const employee = await employeeService.findById(result[0]!.id);
                 return reply.status(201).send({ employee });
             } catch (error) {
+                if (error instanceof Error && error.message === "Email already in use") {
+                    return reply.status(409).send({ message: "Email already in use" });
+                }
+                return reply.status(500).send({ message: "Internal server error" });
+            }
+        },
+    );
+
+    app.withTypeProvider<ZodTypeProvider>().patch(
+        "/employees/:id",
+        {
+            preHandler: [authenticate, adminOnly],
+            schema: UpdateEmployeeSchema,
+        },
+        async (request, reply) => {
+            try {
+                const { id } = request.params as { id: number };
+                const body = request.body as UpdateEmployeeRequest;
+                const employeeService = new EmployeeService(new EmployeeRepository());
+                const updateData: { fullName?: string; email?: string; categoryId?: number; password?: string } = {};
+                if (body.full_name !== undefined) updateData.fullName = body.full_name;
+                if (body.email !== undefined) updateData.email = body.email;
+                if (body.category_id !== undefined) updateData.categoryId = body.category_id;
+                if (body.password !== undefined) updateData.password = body.password;
+                const employee = await employeeService.update(id, updateData);
+                return { employee };
+            } catch (error) {
+                if (error instanceof Error && error.message === "Employee not found") {
+                    return reply.status(404).send({ message: "Employee not found" });
+                }
                 if (error instanceof Error && error.message === "Email already in use") {
                     return reply.status(409).send({ message: "Email already in use" });
                 }

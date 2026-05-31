@@ -33,16 +33,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "ban", employee: Employee): void;
+    (e: "edit", employee: Employee): void;
 }>();
 
 const actions: MenuItem[] = [
+    { label: "Редактировать", value: "edit", icon: "material-symbols:edit-outline-rounded" },
     { label: "Заблокировать", value: "ban", icon: "material-symbols:person-off-outline-rounded" },
 ];
 
 function onAction(item: MenuItem) {
-    if (item.value === "ban") {
-        emit("ban", props.employee);
-    }
+    if (item.value === "edit") emit("edit", props.employee);
+    if (item.value === "ban") emit("ban", props.employee);
 }
 </script>
 

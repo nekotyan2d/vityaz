@@ -357,7 +357,51 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** @description Update employee */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        full_name?: string;
+                        /** Format: email */
+                        email?: string;
+                        category_id?: number;
+                        password?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            employee: {
+                                id: number;
+                                full_name: string;
+                                /** Format: email */
+                                email: string;
+                                category: string;
+                                /** @enum {string} */
+                                role: "admin" | "employee" | "security";
+                                /** Format: date-time */
+                                created_at: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/employees/{id}/ban": {
