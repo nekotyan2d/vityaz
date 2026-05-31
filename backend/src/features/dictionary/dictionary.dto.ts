@@ -4,6 +4,7 @@ export const Category = z.object({
     id: z.number(),
     name: z.string(),
     description: z.string().nullable(),
+    role: z.enum(["admin", "employee", "security"]),
     created_at: z.date(),
 });
 
@@ -21,6 +22,7 @@ export type RoomTypeDTO = z.infer<typeof RoomType>;
 export const CreateCategoryRequestSchema = z.object({
     name: z.string().min(1).max(100),
     description: z.string().max(255).optional(),
+    role: z.enum(["admin", "employee", "security"]).optional().default("employee"),
 });
 
 export type CreateCategoryRequest = z.infer<typeof CreateCategoryRequestSchema>;
@@ -28,6 +30,7 @@ export type CreateCategoryRequest = z.infer<typeof CreateCategoryRequestSchema>;
 export const UpdateCategoryRequestSchema = z.object({
     name: z.string().min(1).max(100).optional(),
     description: z.string().max(255).optional(),
+    role: z.enum(["admin", "employee", "security"]).optional(),
 });
 
 export type UpdateCategoryRequest = z.infer<typeof UpdateCategoryRequestSchema>;

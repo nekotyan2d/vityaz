@@ -1,19 +1,19 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    const withoutAuthRoutes = ["login", "register", "index"];
+    const publicRoutes = ["login", "register", "index"];
+    const adminRoutes = ["home", "employees", "structure", "journal", "access-matrix"];
+    const employeeRoutes = ["qr", "log"];
 
     const authStore = useAuthStore();
+    const { public: config } = useRuntimeConfig();
 
     if (import.meta.server) {
         const headers = useRequestHeaders(["cookie"]);
         const cookie = headers.cookie;
         if (cookie) {
             try {
-                const apiBase = "http://localhost:8000";
-                let data = await $fetch(`${apiBase}/auth/me`, {
+                const data = await $fetch(`${config.apiUrl}/auth/me`, {
                     method: "GET",
-                    headers: {
-                        cookie,
-                    },
+                    headers: { cookie },
                 });
 
                 const user = (data as any)?.employee;
@@ -22,17 +22,35 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
                 authStore.setUser(null);
             }
         }
-
-        await authStore.initPromise;
-    } else {
-        await authStore.initPromise;
     }
 
+    await authStore.initPromise;
+
+    const routeName = to.name as string;
+    const role = authStore.currentUser?.role;
+
     if (!authStore.isAuthenticated) {
-        if (!withoutAuthRoutes.includes(to.name as string)) {
+        if (!publicRoutes.includes(routeName)) {
             return navigateTo({ name: "index" });
         }
-    } else if (withoutAuthRoutes.includes(to.name as string)) {
+        return;
+    }
+
+    if (publicRoutes.includes(routeName)) {
+        if (role === "employee") return navigateTo({ name: "qr" });
+        return navigateTo({ name: "home" });
+    }
+
+    if (routeName === "account" && role === "employee") {
+        setPageLayout("employee");
+        return;
+    }
+
+    if (role === "employee" && adminRoutes.includes(routeName)) {
+        return navigateTo({ name: "qr" });
+    }
+
+    if ((role === "admin" || role === "security") && employeeRoutes.includes(routeName)) {
         return navigateTo({ name: "home" });
     }
 });

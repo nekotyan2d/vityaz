@@ -30,6 +30,13 @@
                         name="material-symbols:history-rounded" />Журнал</NuxtLink
                 >
             </li>
+            <li>
+                <NuxtLink :to="{ name: 'access-matrix' }"
+                    ><Icon
+                        size="24"
+                        name="material-symbols:grid-on-rounded" />Матрица доступа</NuxtLink
+                >
+            </li>
         </ul>
         <div class="bottom">
             <UiPopupMenu

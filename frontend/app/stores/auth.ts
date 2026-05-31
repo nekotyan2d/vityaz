@@ -89,7 +89,12 @@ export const useAuthStore = defineStore("auth", () => {
         _initResolve();
     }
 
-    init();
+    // On client: Pinia already restored SSR state — resolve immediately without re-fetching
+    if (import.meta.client && isAuthenticated.value) {
+        _initResolve();
+    } else {
+        init();
+    }
 
     return {
         currentUser,

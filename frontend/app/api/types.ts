@@ -1150,6 +1150,8 @@ export interface paths {
                                 id: number;
                                 name: string;
                                 description: string | null;
+                                /** @enum {string} */
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             }[];
@@ -1172,6 +1174,11 @@ export interface paths {
                     "application/json": {
                         name: string;
                         description?: string;
+                        /**
+                         * @default employee
+                         * @enum {string}
+                         */
+                        role?: "admin" | "employee" | "security";
                     };
                 };
             };
@@ -1187,6 +1194,8 @@ export interface paths {
                                 id: number;
                                 name: string;
                                 description: string | null;
+                                /** @enum {string} */
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             };
@@ -1229,6 +1238,8 @@ export interface paths {
                     "application/json": {
                         name?: string;
                         description?: string;
+                        /** @enum {string} */
+                        role?: "admin" | "employee" | "security";
                     };
                 };
             };
@@ -1244,6 +1255,8 @@ export interface paths {
                                 id: number;
                                 name: string;
                                 description: string | null;
+                                /** @enum {string} */
+                                role: "admin" | "employee" | "security";
                                 /** Format: date-time */
                                 created_at: string;
                             };

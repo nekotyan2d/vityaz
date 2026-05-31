@@ -1,13 +1,14 @@
 <template>
-    <div class="main-layout">
-        <Sidebar />
+    <div class="employee-layout">
         <main>
             <slot />
         </main>
+        <BottomBar />
     </div>
 </template>
+
 <style lang="scss">
-.main-layout .page {
+.employee-layout .page {
     padding: 24px;
 }
 </style>

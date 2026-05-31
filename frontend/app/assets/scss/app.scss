@@ -28,3 +28,31 @@ a {
         text-decoration: underline;
     }
 }
+
+.main-layout,
+.employee-layout {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+.main-layout {
+    display: flex;
+
+    > main {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+}
+
+.employee-layout {
+    display: flex;
+    flex-direction: column;
+
+    > main {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+}

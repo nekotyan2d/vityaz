@@ -37,14 +37,14 @@ export const RoomResponseSchema = z.object({
 });
 
 export const CreateFloorRequestSchema = z.object({
-    number: z.number().int().positive(),
+    number: z.number().int().min(1).max(999),
     description: z.string().max(255).optional(),
 });
 
 export type CreateFloorRequest = z.infer<typeof CreateFloorRequestSchema>;
 
 export const UpdateFloorRequestSchema = z.object({
-    number: z.number().int().positive().optional(),
+    number: z.number().int().min(1).max(999).optional(),
     description: z.string().max(255).optional(),
 });
 

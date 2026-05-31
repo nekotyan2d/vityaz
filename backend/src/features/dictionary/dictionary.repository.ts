@@ -4,39 +4,46 @@ import { eq } from "drizzle-orm";
 import type { CategoryDTO, RoomTypeDTO } from "./dictionary.dto";
 
 export class DictionaryRepository {
-    findAllCategories(): Promise<CategoryDTO[]> {
+    findAllCategories() {
         return db
             .select({
                 id: employeeCategories.id,
                 name: employeeCategories.name,
                 description: employeeCategories.description,
+                role: employeeCategories.role,
                 created_at: employeeCategories.createdAt,
             })
             .from(employeeCategories);
     }
 
-    async createCategory(data: { name: string; description?: string }): Promise<CategoryDTO> {
+    async createCategory(data: { name: string; description?: string; role?: "admin" | "employee" | "security" }) {
         const result = await db
             .insert(employeeCategories)
-            .values({ name: data.name, description: data.description })
+            .values({ name: data.name, description: data.description, role: data.role })
             .returning({
                 id: employeeCategories.id,
                 name: employeeCategories.name,
                 description: employeeCategories.description,
+                role: employeeCategories.role,
                 created_at: employeeCategories.createdAt,
             });
         return result[0]!;
     }
 
-    async updateCategory(id: number, data: { name?: string; description?: string }): Promise<CategoryDTO | null> {
+    async updateCategory(id: number, data: { name?: string; description?: string; role?: "admin" | "employee" | "security" }) {
         const result = await db
             .update(employeeCategories)
-            .set({ ...(data.name && { name: data.name }), ...(data.description !== undefined && { description: data.description }) })
+            .set({
+                ...(data.name && { name: data.name }),
+                ...(data.description !== undefined && { description: data.description }),
+                ...(data.role && { role: data.role }),
+            })
             .where(eq(employeeCategories.id, id))
             .returning({
                 id: employeeCategories.id,
                 name: employeeCategories.name,
                 description: employeeCategories.description,
+                role: employeeCategories.role,
                 created_at: employeeCategories.createdAt,
             });
         return result[0] ?? null;

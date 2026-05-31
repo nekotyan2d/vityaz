@@ -53,8 +53,9 @@ app.register(fastifySwaggerUi, {
 
 app.register(fastifyCookie);
 app.register(fastifyCors, {
-    origin: "http://localhost:3000",
+    origin: env.FRONTEND_URL,
     credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
 
 app.after(() => {
@@ -67,7 +68,7 @@ app.after(() => {
     registerDictionaryRoutes(app);
 });
 
-app.listen({ port: PORT }, (err, address) => {
+app.listen({ host: env.HOST, port: PORT }, (err, address) => {
     if (err) {
         console.error("Error starting server:", err);
         process.exit(1);
