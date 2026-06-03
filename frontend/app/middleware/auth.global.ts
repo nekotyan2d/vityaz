@@ -4,14 +4,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const employeeRoutes = ["qr", "log"];
 
     const authStore = useAuthStore();
-    const { public: config } = useRuntimeConfig();
+    const { apiUrl: privateApiUrl, public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
+    const apiUrl = privateApiUrl || publicApiUrl;
 
     if (import.meta.server) {
         const headers = useRequestHeaders(["cookie"]);
         const cookie = headers.cookie;
         if (cookie) {
             try {
-                const data = await $fetch(`${config.apiUrl}/auth/me`, {
+                const data = await $fetch(`${apiUrl}/auth/me`, {
                     method: "GET",
                     headers: { cookie },
                 });

@@ -2,8 +2,8 @@ import { hashPassword } from "@/utils/pass";
 import { db } from "./client";
 import { categoryAccessRules, employeeCategories, employees, roomTypes } from "./schema";
 
-async function main() {
-    console.log("🌱 Seeding database...");
+export async function seed() {
+    console.log("Seeding database...");
 
     // Категории сотрудников
     await db
@@ -91,11 +91,12 @@ async function main() {
         ])
         .onConflictDoNothing();
 
-    console.log("⚡ Database seeded successfully");
-    process.exit(0);
+    console.log("Seed applied");
 }
 
-main().catch((err) => {
-    console.error("❌ Seed failed:", err);
-    process.exit(1);
-});
+if (process.argv[1]?.endsWith("seed.ts") || process.argv[1]?.endsWith("seed.mjs")) {
+    seed().catch((err: unknown) => {
+        console.error("Seed failed:", err);
+        process.exit(1);
+    });
+}

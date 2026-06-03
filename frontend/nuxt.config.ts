@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     modules: ["@pinia/nuxt", "@nuxt/icon"],
     runtimeConfig: {
+        apiUrl: process.env.NUXT_API_URL ?? "",
         public: {
             apiUrl: process.env.NUXT_PUBLIC_API_URL ?? "http://localhost:8000",
         },
