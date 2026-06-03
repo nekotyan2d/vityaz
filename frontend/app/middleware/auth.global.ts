@@ -1,27 +1,19 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
     const publicRoutes = ["login", "register", "index"];
     const adminRoutes = ["home", "employees", "structure", "journal", "access-matrix"];
-    const employeeRoutes = ["qr", "log"];
+    const employeeRoutes = ["log"];
 
     const authStore = useAuthStore();
-    const { apiUrl: privateApiUrl, public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
-    const apiUrl = privateApiUrl || publicApiUrl;
 
     if (import.meta.server) {
-        const headers = useRequestHeaders(["cookie"]);
-        const cookie = headers.cookie;
-        if (cookie) {
-            try {
-                const data = await $fetch(`${apiUrl}/auth/me`, {
-                    method: "GET",
-                    headers: { cookie },
-                });
-
-                const user = (data as any)?.employee;
-                authStore.setUser(user ?? null);
-            } catch (e) {
-                authStore.setUser(null);
-            }
+        const api = useApi();
+        try {
+            const res = await api.GET("/auth/me");
+            authStore.setUser(res.data?.employee ?? null);
+        } catch {
+            // SSR auth failed (backend unreachable) — don't redirect,
+            // let client re-validate with browser cookies
+            return;
         }
     }
 
@@ -32,6 +24,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     if (!authStore.isAuthenticated) {
         if (!publicRoutes.includes(routeName)) {
+            if (import.meta.server) return; // не редиректим с сервера при провале
             return navigateTo({ name: "index" });
         }
         return;

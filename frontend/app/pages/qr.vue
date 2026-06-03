@@ -1,4 +1,5 @@
 <template>
+    <NuxtLayout :name="layout">
     <div class="qr-page">
         <header class="qr-header">
             <h1>Сканер QR</h1>
@@ -69,12 +70,16 @@
             </template>
         </div>
     </div>
+    </NuxtLayout>
 </template>
 
 <script lang="ts" setup>
 import { QrcodeStream } from "vue-qrcode-reader";
 
-definePageMeta({ layout: "employee" });
+definePageMeta({ layout: false });
+
+const authStore = useAuthStore();
+const layout = computed(() => authStore.currentUser?.role === "employee" ? "employee" : "default");
 
 const api = useApi();
 

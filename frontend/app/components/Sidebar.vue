@@ -39,6 +39,14 @@
                 </NuxtLink>
             </li>
             <li>
+                <NuxtLink :to="{ name: 'qr' }">
+                    <Icon
+                        size="24"
+                        name="material-symbols:qr-code-scanner-rounded" />
+                    <span class="nav-label">Сканер QR</span>
+                </NuxtLink>
+            </li>
+            <li>
                 <NuxtLink :to="{ name: 'journal' }">
                     <Icon
                         size="24"
