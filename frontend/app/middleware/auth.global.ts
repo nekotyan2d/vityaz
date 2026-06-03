@@ -6,17 +6,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const authStore = useAuthStore();
 
     if (import.meta.server) {
-        const { apiUrl: runtimeApiUrl, public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
-        const apiUrl = process.env.NUXT_API_URL || runtimeApiUrl || publicApiUrl;
-        const headers = useRequestHeaders(["cookie"]);
         try {
-            const data = await $fetch<{ employee: any }>(`${apiUrl}/auth/me`, {
-                headers: headers.cookie ? { cookie: headers.cookie } : {},
-            });
+            const api = useApi();
+            const { data } = await api.GET("/auth/me");
             authStore.setUser(data?.employee ?? null);
-        } catch (e: any) {
+        } catch {
             authStore.setUser(null);
-            if (e?.statusCode !== 401 && e?.status !== 401) return;
         }
     }
 
