@@ -196,7 +196,7 @@ type Room = paths["/rooms"]["get"]["responses"]["200"]["content"]["application/j
 type RoomType =
     paths["/dictionary/room-types"]["get"]["responses"]["200"]["content"]["application/json"]["roomTypes"][number];
 
-const API_BASE_URL = "http://localhost:8000";
+const { public: { apiUrl: API_BASE_URL } } = useRuntimeConfig();
 
 const api = useApi();
 const notifications = useNotificationsStore();
