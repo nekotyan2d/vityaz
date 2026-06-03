@@ -6,8 +6,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const authStore = useAuthStore();
 
     if (import.meta.server) {
-        const { apiUrl: privateApiUrl, public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
-        const apiUrl = privateApiUrl || publicApiUrl;
+        const { apiUrl: runtimeApiUrl, public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
+        const apiUrl = process.env.NUXT_API_URL || runtimeApiUrl || publicApiUrl;
         const headers = useRequestHeaders(["cookie"]);
         try {
             const data = await $fetch<{ employee: any }>(`${apiUrl}/auth/me`, {
@@ -16,7 +16,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
             authStore.setUser(data?.employee ?? null);
         } catch (e: any) {
             authStore.setUser(null);
-            // Если бекенд недоступен (не 401), не редиректим — клиент разберётся
             if (e?.statusCode !== 401 && e?.status !== 401) return;
         }
     }
