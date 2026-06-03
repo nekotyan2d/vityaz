@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    const publicRoutes = ["login", "register", "index"];
+    const publicRoutes = ["login", "register", "index", "sse-roomId"];
     const adminRoutes = ["home", "employees", "structure", "journal", "access-matrix"];
     const employeeRoutes = ["log"];
 
