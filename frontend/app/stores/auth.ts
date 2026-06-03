@@ -89,10 +89,14 @@ export const useAuthStore = defineStore("auth", () => {
         _initResolve();
     }
 
-    // On client: Pinia already restored SSR state — resolve immediately without re-fetching
-    if (import.meta.client && isAuthenticated.value) {
+    if (import.meta.server) {
+        // SSR: middleware handles user loading via setUser(), no need to fetch again
+        _initResolve();
+    } else if (isAuthenticated.value) {
+        // Client: Pinia restored authenticated state from SSR — resolve immediately
         _initResolve();
     } else {
+        // Client: no hydrated state — fetch user
         init();
     }
 
