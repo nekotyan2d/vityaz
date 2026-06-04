@@ -31,6 +31,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Матрица доступа" });
 import type { paths } from "@/api/types";
 
 type Category = paths["/dictionary/categories"]["get"]["responses"]["200"]["content"]["application/json"]["categories"][number];

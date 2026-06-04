@@ -19,6 +19,7 @@
     </form>
 </template>
 <script lang="ts" setup>
+useHead({ title: "Войти" });
 import z from "zod";
 
 definePageMeta({

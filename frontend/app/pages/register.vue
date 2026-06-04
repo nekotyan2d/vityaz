@@ -24,6 +24,7 @@
     </form>
 </template>
 <script lang="ts" setup>
+useHead({ title: "Регистрация" });
 import z from "zod";
 
 definePageMeta({

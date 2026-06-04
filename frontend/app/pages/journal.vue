@@ -32,6 +32,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Журнал посещений" });
 import type { paths } from "@/api/types";
 
 type LogEntry = paths["/access/log"]["get"]["responses"]["200"]["content"]["application/json"]["log"][number];

@@ -47,6 +47,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Аккаунт" });
 definePageMeta({ layout: false });
 
 const authStore = useAuthStore();

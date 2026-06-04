@@ -233,6 +233,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Сотрудники" });
 import z from "zod";
 import type { paths } from "@/api/types";
 import type { MenuItem } from "@/components/ui/PopupMenu.vue";

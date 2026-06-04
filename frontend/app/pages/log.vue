@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "История посещений" });
 import type { paths } from "@/api/types";
 
 definePageMeta({ layout: "employee" });

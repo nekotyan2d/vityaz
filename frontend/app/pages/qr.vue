@@ -74,6 +74,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Сканер QR" });
 import { QrcodeStream } from "vue-qrcode-reader";
 
 definePageMeta({ layout: false });

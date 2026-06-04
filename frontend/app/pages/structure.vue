@@ -187,6 +187,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Структура здания" });
 import z from "zod";
 import type { paths } from "@/api/types";
 import type { MenuItem } from "@/components/ui/PopupMenu.vue";

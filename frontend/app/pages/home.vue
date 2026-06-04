@@ -23,6 +23,7 @@
 </template>
 
 <script lang="ts" setup>
+useHead({ title: "Главная" });
 import type { paths } from "@/api/types";
 
 type LogEntry = paths["/access/log"]["get"]["responses"]["200"]["content"]["application/json"]["log"][number];
