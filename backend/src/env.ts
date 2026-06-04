@@ -10,6 +10,7 @@ const envSchema = z.object({
     REFRESH_TOKEN_SECRET: z.string().min(1),
     ACCESS_TOKEN_EXPIRES_IN: z.coerce.number().default(15 * 60), // 15 minutes
     REFRESH_TOKEN_EXPIRES_IN: z.coerce.number().default(7 * 24 * 60 * 60), // 7 days
+    COOKIE_DOMAIN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

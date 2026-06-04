@@ -89,21 +89,14 @@ export const useAuthStore = defineStore("auth", () => {
         _initResolve();
     }
 
-    async function fetchFullUser() {
-        try {
-            const res = await api.GET("/auth/me", { credentials: "include" });
-            if (res.data) currentUser.value = res.data.employee;
-        } catch {
-            // silent — full profile loads on next API call
-        }
-    }
-
     if (import.meta.server) {
+        // SSR: middleware loads user via setUser(), state hydrates to client
         _initResolve();
     } else if (isAuthenticated.value) {
+        // Client: Pinia restored authenticated state from SSR — resolve immediately
         _initResolve();
-        fetchFullUser(); // fill in full profile in background, don't block routing
     } else {
+        // Client: no hydrated state — fetch user
         init();
     }
 

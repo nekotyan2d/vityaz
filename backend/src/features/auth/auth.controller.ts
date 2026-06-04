@@ -5,12 +5,19 @@ import type { LoginRequestBody, RegisterRequestBody } from "./auth.dto";
 import { AuthService } from "./auth.service";
 import { AuthRepository } from "./auth.repository";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { env } from "@/env";
 
 const authCookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
+};
+
+const clearCookieOptions = {
+    path: "/",
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
 };
 
 export function registerAuthRoutes(app: FastifyInstance) {
@@ -105,8 +112,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
             } catch (error) {
                 if (error instanceof Error && error.message === "Учётная запись заблокирована") {
                     return reply
-                        .clearCookie("access_token", { path: "/" })
-                        .clearCookie("refresh_token", { path: "/" })
+                        .clearCookie("access_token", clearCookieOptions)
+                        .clearCookie("refresh_token", clearCookieOptions)
                         .status(403)
                         .send({ message: error.message });
                 }
@@ -129,8 +136,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
             }
 
             return reply
-                .clearCookie("access_token", { path: "/" })
-                .clearCookie("refresh_token", { path: "/" })
+                .clearCookie("access_token", clearCookieOptions)
+                .clearCookie("refresh_token", clearCookieOptions)
                 .status(204)
                 .send();
         },
