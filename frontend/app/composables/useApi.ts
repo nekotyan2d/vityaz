@@ -21,8 +21,10 @@ async function refreshSession(apiUrl: string) {
 }
 
 export function useApi() {
-    const { internalApiUrl, public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
-    const baseUrl = import.meta.server && internalApiUrl ? internalApiUrl : publicApiUrl;
+    const { public: { apiUrl: publicApiUrl } } = useRuntimeConfig();
+    const baseUrl = import.meta.server
+        ? (useRuntimeConfig().internalApiUrl || publicApiUrl)
+        : publicApiUrl;
     const ssrCookies = import.meta.server ? useRequestHeaders(["cookie"]) : {};
 
     const client = createClient<paths>({

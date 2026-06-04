@@ -1,7 +1,12 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-    const publicRoutes = ["login", "register", "index", "sse-roomId"];
+    const guestRoutes = ["login", "register", "index"];
+    const openRoutes = ["sse-roomId"];
     const adminRoutes = ["home", "employees", "structure", "journal", "access-matrix"];
     const employeeRoutes = ["log"];
+
+    const routeName = to.name as string;
+
+    if (openRoutes.includes(routeName)) return;
 
     const authStore = useAuthStore();
 
@@ -21,17 +26,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     await authStore.initPromise;
 
-    const routeName = to.name as string;
     const role = authStore.currentUser?.role;
 
     if (!authStore.isAuthenticated) {
-        if (!publicRoutes.includes(routeName)) {
+        if (!guestRoutes.includes(routeName)) {
             return navigateTo({ name: "index" });
         }
         return;
     }
 
-    if (publicRoutes.includes(routeName)) {
+    if (guestRoutes.includes(routeName)) {
         if (role === "employee") return navigateTo({ name: "qr" });
         return navigateTo({ name: "home" });
     }

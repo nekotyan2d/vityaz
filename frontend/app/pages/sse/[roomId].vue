@@ -3,12 +3,20 @@
         class="door-screen"
         :data-state="event ? (event.allowed ? 'allowed' : 'denied') : 'idle'">
         <template v-if="!event">
+            <template v-if="roomInfo">
+                <p class="room-type">{{ roomInfo.type }}</p>
+                <p class="room-number">{{ roomInfo.number }}</p>
+                <p
+                    v-if="roomInfo.name"
+                    class="room-name">
+                    {{ roomInfo.name }}
+                </p>
+            </template>
             <p
-                v-if="lastRoom"
-                class="room-type">
-                Помещение
+                v-else
+                class="room-number">
+                —
             </p>
-            <p class="room-number">{{ lastRoom ?? "—" }}</p>
         </template>
 
         <template v-else>
@@ -36,14 +44,19 @@ type SsePayload = {
     direction: "in" | "out";
 };
 
+type RoomInfo = {
+    number: string;
+    name: string | null;
+    type: string;
+};
+
 const event = ref<SsePayload | null>(null);
-const lastRoom = ref<string | null>(null);
+const roomInfo = ref<RoomInfo | null>(null);
 
 let resetTimer: ReturnType<typeof setTimeout> | null = null;
 
 function handleEvent(payload: SsePayload) {
     if (resetTimer) clearTimeout(resetTimer);
-    lastRoom.value = payload.room;
     event.value = payload;
     resetTimer = setTimeout(() => {
         event.value = null;
@@ -59,6 +72,12 @@ onMounted(() => {
             handleEvent(JSON.parse(e.data));
         } catch {}
     };
+
+    source.addEventListener("room-info", (e) => {
+        try {
+            roomInfo.value = JSON.parse((e as MessageEvent).data);
+        } catch {}
+    });
 
     onUnmounted(() => {
         source.close();
@@ -93,6 +112,14 @@ onMounted(() => {
     margin: 0;
     color: #000;
     letter-spacing: -0.02em;
+}
+
+.room-name {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0;
+    color: #555;
+    word-break: break-word;
 }
 
 .result__circle {
